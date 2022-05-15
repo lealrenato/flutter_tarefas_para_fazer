@@ -18,6 +18,8 @@ class _ToDoListState extends State<ToDoList> {
   Todo? deletedTodo;
   int? deletedTodoPosition;
 
+  String? errorText;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -46,18 +48,30 @@ class _ToDoListState extends State<ToDoList> {
                       controller: todosController,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
+                        labelText: 'Adicione uma tarefa',
+                        hintText: 'Ex.: Comprar maçãs',
+                        errorText: errorText,
                       ),
                     ),
                   ),
                   SizedBox(width: 8),
                   ElevatedButton(
                     onPressed: () {
+                      String text = todosController.text;
+                      if (text.isEmpty) {
+                        setState(() {
+                          errorText = 'A tarefa não pode ser vasia';
+                        });
+                        return;
+                      }
+
                       setState(() {
                         Todo newTodo = Todo(
-                          subtitle: todosController.text,
+                          subtitle: text,
                           dateTime: DateTime.now(),
                         );
                         todos.add(newTodo);
+                        errorText = null;
                       });
 
                       todosController.clear();
@@ -116,6 +130,7 @@ class _ToDoListState extends State<ToDoList> {
     setState(() {
       todos.remove(todo);
     });
+    todoRepository.saveTodoList(todos);
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -167,5 +182,6 @@ class _ToDoListState extends State<ToDoList> {
     setState(() {
       todos = [];
     });
+    todoRepository.saveTodoList(todos);
   }
 }
